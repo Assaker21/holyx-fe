@@ -29,6 +29,10 @@ export default function ProvidersPage() {
         {
           accessorKey: "schedule",
           header: "Schedule",
+          cell: ({ row }) =>
+            (row.original.schedule.join(", ").length > 100
+              ? row.original.schedule.join(", ").slice(0, 100) + "..."
+              : row.original.schedule.join(", ")) || "None",
         },
       ]}
       title={"All Providers"}

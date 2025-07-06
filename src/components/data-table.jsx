@@ -35,7 +35,10 @@ import {
 import { Tabs } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useApi from "@/hooks/useApi.hook";
-import { imageToBase64String } from "@/lib/imageToBase64String";
+import {
+  base64StringToImageUrl,
+  imageToBase64String,
+} from "@/lib/imageToBase64String";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -55,6 +58,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
+import SpinnerCircle3 from "./spinner-09";
+import { Textarea } from "./ui/textarea";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "./ui/scroll-area";
 
 function Row({ row }) {
   return (
@@ -86,8 +93,8 @@ export function DataTablePage({
   });
   if (!dataApi.data)
     return (
-      <div className="flex flex-row justify-center items-center">
-        Loading...
+      <div className="flex flex-row h-[calc(100vh-100px)] justify-center items-center">
+        <SpinnerCircle3 />
       </div>
     );
 
@@ -525,11 +532,15 @@ function TableCellViewer({
         return (
           <div className="flex flex-col gap-3" key={field.name}>
             <Label htmlFor={field.name}>{field.label}</Label>
-            <Input
+            <Textarea
+              rows={10}
               id={field.name}
-              value={Array.isArray(value) ? value.join(",") : ""}
+              value={Array.isArray(value) ? value.join(", ") : ""}
               onChange={(e) => {
-                changeForm(field.name, e.target.value.split(","));
+                changeForm(
+                  field.name,
+                  e.target.value.split(",").map((v) => v.trim())
+                );
               }}
               required
               placeholder="Comma-separated"
@@ -541,23 +552,44 @@ function TableCellViewer({
         return (
           <div className="flex flex-col gap-3" key={field.name}>
             <Label htmlFor={field.name}>{field.label}</Label>
-            <Input
+
+            <Label
+              htmlFor={field.name}
+              className={
+                "relative group inline-block w-full rounded-sm overflow-hidden border"
+              }
+            >
+              <img
+                className="w-full min-h-15"
+                src={base64StringToImageUrl(form[field.name])}
+              />
+              <div
+                className={cn(
+                  "cursor-pointer absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
+                  !form[field.name] && "opacity-100"
+                )}
+              >
+                Edit
+              </div>
+            </Label>
+            {/*<Input
               id={field.name}
               value={form[field.name]}
               onChange={(e) => {
                 changeForm(field.name, e.target.value);
               }}
               required
-            />
+            />*/}
+
             <input
+              id={field.name}
               type="file"
               accept="image/*"
+              className="hidden"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  console.log("FILE: ", file);
                   const str = await imageToBase64String(file);
-                  console.log("STR: ", str);
                   changeForm(field.name, str);
                 }
               }}
@@ -610,9 +642,14 @@ function TableCellViewer({
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm pb-4">
+        <ScrollArea
+          className={cn(
+            "flex max-h-[calc(100vh-176px)] touch-auto flex-1 flex-col gap-4 overflow-y-visible px-4 text-sm pb-4",
+            isMobile && "max-h-[calc(100vh-400px)]"
+          )}
+        >
           <div className="flex flex-col gap-4">{fields.map(renderField)}</div>
-        </div>
+        </ScrollArea>
         <DrawerFooter>
           <Button type="submit" loading={loading}>
             {mode == "create" ? "Create" : "Save"}

@@ -2,9 +2,16 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DataTablePage } from "@/components/data-table";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Outlet } from "react-router";
+import { useAuth } from "@/contexts/auth.context";
+import { Navigate, Outlet } from "react-router";
 
 export default function MainLayout() {
+  const auth = useAuth();
+
+  if (!auth.user) {
+    return <Navigate to="/auth/login" />;
+  }
+
   return (
     <SidebarProvider
       style={{

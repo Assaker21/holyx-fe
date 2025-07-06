@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const baseUrl = "https://holyx-api.onrender.com"; //"http://localhost:3000";
+const DEVELOPMENT = true;
+
+const baseUrl = !DEVELOPMENT
+  ? "https://holyx-api.onrender.com"
+  : "http://localhost:3000";
 
 export default function useApi({
   settings = { url: "", body: (b) => b, method: "GET" },
@@ -44,7 +48,7 @@ export default function useApi({
         url,
         headers: {
           "Content-Type": files ? "multipart/form-data" : "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
+          access: localStorage.getItem("access"),
         },
         data: sentData,
       };
@@ -57,6 +61,11 @@ export default function useApi({
       data = response.data.body ?? response.data;
     } catch (err) {
       response = err.response;
+
+      if (err.response?.status == 403 && !settings.url.includes("profile")) {
+        window.history.pushState({}, "", "/auth/login");
+        window.location.reload();
+      }
       setError(err.response?.data || err.message || "Something went wrong");
       setData(null);
       error = err.response?.data || err.message || "Something went wrong";

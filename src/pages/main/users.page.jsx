@@ -62,6 +62,11 @@ export default function UsersPage() {
           type: "string",
         },
         {
+          name: "password",
+          label: "Password",
+          type: "string",
+        },
+        {
           name: "role",
           label: "Role",
           type: "select",
