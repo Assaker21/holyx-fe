@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const DEVELOPMENT = true;
+const DEVELOPMENT = false;
 
 const baseUrl = !DEVELOPMENT
   ? "https://holyx-api.onrender.com"
